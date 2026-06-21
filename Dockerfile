@@ -1,4 +1,4 @@
-﻿# Build stage
+# Build stage
 FROM rust:1.96-slim-bookworm AS builder
 
 WORKDIR /app
@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y libssl-dev pkg-config && rm -rf /var/li
 # Copy manifests first for better caching
 COPY Cargo.toml Cargo.lock ./
 COPY .sqlx ./.sqlx
+
+# Copy migrations (needed for SQLx compile-time verification)
+COPY migrations ./migrations
 
 # Copy source code
 COPY src ./src

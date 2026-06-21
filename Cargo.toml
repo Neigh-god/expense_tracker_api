@@ -21,7 +21,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 rust_decimal = { version = "1", features = ["serde", "db-postgres"] }
-
+tower-http = { version = "0.6", features = ["trace"] }
 [dev-dependencies]
 tower = "0.5"
 hyper = "1"

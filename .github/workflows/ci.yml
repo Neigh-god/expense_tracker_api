@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:16-alpine
@@ -29,29 +29,36 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-    
-    - name: Cache cargo dependencies
-      uses: Swatinem/rust-cache@v2
-    
-    - name: Install sqlx-cli
-      run: cargo install sqlx-cli --no-default-features --features native-tls,postgres
-    
-    - name: Setup test database
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/expense_tracker_test
-      run: |
-        sqlx database create
-        sqlx migrate run
-    
-    - name: Run tests
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/expense_tracker_test
-        JWT_SECRET: test-secret-key-for-ci
-        JWT_EXPIRATION: 604800
-        PORT: 3000
-        RUST_LOG: debug
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features native-tls,postgres
+
+      - name: Setup test database
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/expense_tracker_test
+        run: |
+          sqlx database create
+          sqlx migrate run
+
+      - name: Build
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/expense_tracker_test
+          SQLX_OFFLINE: true    # ← ADD THIS
+        run: cargo build
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/expense_tracker_test
+          JWT_SECRET: test-secret-key-for-ci
+          JWT_EXPIRATION: 604800
+          PORT: 3000
+          RUST_LOG: debug
+          SQLX_OFFLINE: true    # ← ADD THIS
+        run: cargo test --verbose
